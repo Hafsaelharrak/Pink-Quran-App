@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hafsa's Library</title>
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Quicksand:wght@300;400;500&display=swap" rel="stylesheet">
+    
+    <style>
+        /* --- 1. PREMIUM THEME VARIABLES --- */
+        :root {
+            /* Backgrounds */
+            --bg-gradient: linear-gradient(135deg, #FFF0F5 0%, #FFE4E1 100%);
+            --glass-bg: rgba(255, 255, 255, 0.85);
+            --glass-border: rgba(255, 255, 255, 0.9);
+            
+            /* Accents */
+            --pink-accent: #FFC1CC;
+            --pink-shadow: rgba(255, 193, 204, 0.4);
+            
+            /* Text */
+            --dark-rose: #B85070;
+            --text-color: #5D4037;
+            
+            /* The "Real" Gold Gradient */
+            --gold-gradient: linear-gradient(45deg, #D4AF37, #F6E07B, #D4AF37);
+            
+            /* Fonts */
+            --font-header: 'Playfair Display', serif;
+            --font-body: 'Quicksand', sans-serif;
+            --font-arabic: 'Amiri', serif;
+        }
+
+        /* --- 2. CORE LAYOUT --- */
+        body {
+            background: var(--bg-gradient);
+            background-attachment: fixed; /* Keeps background still while scrolling */
+            font-family: var(--font-body);
+            color: var(--text-color);
+            margin: 0; padding: 0;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Smooth Custom Scrollbar */
+        ::-webkit-scrollbar { width: 12px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { 
+            background: #eecdd4; 
+            border: 3px solid transparent; 
+            background-clip: content-box; 
+            border-radius: 50px; 
+        }
+
+        /* --- 3. HEADER & RIBBON --- */
+        header { 
+            text-align: center; 
+            padding-top: 4rem; 
+            padding-bottom: 2rem;
+            animation: floatDown 1s ease-out;
+        }
+
+        .ribbon {
+            display: inline-block;
+            background: white;
+            color: var(--dark-rose);
+            padding: 15px 60px;
+            font-family: var(--font-header);
+            font-size: 2.5rem;
+            font-weight: 700;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            
+            /* Premium Border & Shadow */
+            border: 4px solid #fff;
+            outline: 2px solid #FFC1CC;
+            box-shadow: 0 10px 30px rgba(184, 80, 112, 0.15);
+            border-radius: 2px;
+            position: relative;
+        }
+        
+        /* The decorative bow */
+        .ribbon::before { 
+            content: "🎀"; 
+            font-size: 3.5rem; 
+            position: absolute; 
+            top: -55px; left: 50%; 
+            transform: translateX(-50%); 
+            filter: drop-shadow(0 5px 5px rgba(0,0,0,0.1));
+        }
+
+        /* --- 4. LIBRARY GRID (Cards) --- */
+        #library-view {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 2rem;
+            padding: 10px;
+        }
+
+        .book-spine {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Bouncy transition */
+            
+            /* Glassy Border */
+            border: 1px solid rgba(255,255,255, 0.6);
+            box-shadow: 
+                0 4px 6px rgba(0,0,0,0.02), 
+                0 10px 20px rgba(194, 94, 126, 0.1); /* Soft pink shadow */
+            
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            height: 180px;
+            overflow: hidden;
+        }
+        
+        /* Gold accent line on the left */
+        .book-spine::after {
+            content: "";
+            position: absolute;
+            left: 0; top: 0; bottom: 0;
+            width: 6px;
+            background: var(--gold-gradient);
+            border-radius: 12px 0 0 12px;
+        }
+
+        .book-spine:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(194, 94, 126, 0.2);
+        }
+
+        .surah-num {
+            position: absolute;
+            top: -10px; right: 10px;
+            font-size: 5rem;
+            font-family: var(--font-header);
+            color: #FFF0F5; /* Barely visible background number */
+            opacity: 0.8;
+            z-index: 0;
+            font-weight: 900;
+        }
+        
+        .surah-eng { 
+            font-family: var(--font-header); 
+            font-size: 1.6rem; 
+            color: var(--dark-rose); 
+            font-weight: 700; 
+            z-index: 1; 
+        }
+        .surah-ara { 
+            font-family: var(--font-arabic); 
+            font-size: 1.8rem; 
+            color: #8D6E63; 
+            text-align: right; 
+            margin-top: 10px; 
+            z-index: 1;
+        }
+
+        /* --- 5. READING VIEW (The Page) --- */
+        #surah-view {
+            display: none;
+            width: 90%;
+            max-width: 950px;
+            margin: 20px auto 80px auto;
+            
+            /* Glassmorphism Effect */
+            background: var(--glass-bg);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid white;
+            
+            padding: 60px;
+            border-radius: 20px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.05);
+            position: relative;
+        }
+
+        .nav-bar { margin-bottom: 40px; }
+        .back-btn {
+            background: white;
+            border: 2px solid #FFE4E1;
+            color: var(--dark-rose);
+            padding: 12px 35px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-family: var(--font-body);
+            font-weight: 700;
+            transition: 0.3s;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 1px;
+        }
+        .back-btn:hover { 
+            background: var(--pink-accent); 
+            color: white; 
+            border-color: var(--pink-accent);
+            transform: translateX(-5px);
+        }
+
+        .surah-header { 
+            text-align: center; 
+            margin-bottom: 60px; 
+            position: relative;
+        }
+        
+        .surah-header::after {
+            content: "✨";
+            display: block;
+            font-size: 1.5rem;
+            margin-top: 20px;
+            opacity: 0.5;
+        }
+        
+        .current-title { 
+            font-family: var(--font-header); 
+            font-size: 3.5rem; 
+            background: -webkit-linear-gradient(45deg, #C25E7E, #8E3A56);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+        
+        .bismillah { 
+            font-family: var(--font-arabic); 
+            font-size: 3rem; 
+            color: #D4AF37; /* Matte Gold */
+            margin-top: 20px; 
+            font-feature-settings: "cv01"; 
+        }
+
+        /* --- VERSE STYLING --- */
+        .verse-container { 
+            margin-bottom: 50px; 
+            text-align: center; 
+            padding-bottom: 30px;
+            border-bottom: 1px dashed rgba(212, 175, 55, 0.3); /* Subtle gold dash */
+            
+            /* Initial State for Animation */
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.8s ease forwards;
+        }
+
+        .arabic-text { 
+            font-family: var(--font-arabic); 
+            font-size: 2.6rem; 
+            line-height: 2.2; 
+            color: #3E2723; 
+            margin-bottom: 25px; 
+            direction: rtl;
+        }
+        
+        .english-text { 
+            font-family: var(--font-body); 
+            font-style: italic; 
+            color: var(--dark-rose); 
+            font-size: 1.25rem;
+            max-width: 85%;
+            margin: 0 auto;
+            line-height: 1.8;
+            opacity: 0.9;
+        }
+
+        /* --- THE PERFECT CIRCLE (CSS) --- */
+        .ayah-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            
+            width: 48px;
+            height: 48px;
+            margin: 0 12px;
+            
+            /* The Magic: Double border using pure CSS */
+            background: transparent;
+            border: 3px double #D4AF37; 
+            border-radius: 50%;
+            
+            font-family: var(--font-body);
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #8D6E63;
+            vertical-align: middle;
+            
+            position: relative;
+            top: -5px;
+        }
+
+        /* --- NAVIGATION ARROWS --- */
+        .page-navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 60px;
+            padding-top: 30px;
+        }
+
+        .nav-arrow {
+            background: white;
+            border: none;
+            color: var(--text-color);
+            padding: 15px 30px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-family: var(--font-header);
+            font-size: 1.1rem;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+
+        .nav-arrow:hover {
+            background: var(--pink-accent);
+            color: white;
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(255, 193, 204, 0.6);
+        }
+
+        /* --- LOADER & ANIMATIONS --- */
+        @keyframes fadeInUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes floatDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .loader {
+            display: block;
+            text-align: center;
+            padding: 100px 0;
+            color: var(--dark-rose);
+            font-family: var(--font-header);
+            font-size: 1.5rem;
+        }
+        .heart-beat { animation: beat 1s infinite alternate; display: inline-block; font-size: 3rem; margin-bottom: 20px;}
+        @keyframes beat { to { transform: scale(1.15); filter: brightness(1.1); } }
+        
+        .error-msg {
+            color: #D32F2F; border: 2px dashed #D32F2F; padding: 20px; margin: 20px; display:inline-block;
+            background: #fff0f0; border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="ribbon">Hafsa's Library</div>
+    </header>
+
+    <div id="library-view">
+        <div id="library-loader" class="loader">
+            <span class="heart-beat">📖</span><br>
+            Opening the library...
+        </div>
+        <div class="grid" id="surah-grid"></div>
+    </div>
+
+    <div id="surah-view">
+        <div class="nav-bar">
+            <button class="back-btn" onclick="goBack()">← Back to Library</button>
+        </div>
+        
+        <div id="page-loader" class="loader" style="display:none;">
+            <span class="heart-beat">✨</span><br>
+            Gathering all verses...
+        </div>
+
+        <div id="surah-content" style="display:none;">
+            <div class="surah-header">
+                <div class="current-title" id="display-title">Surah Name</div>
+                <div class="bismillah">بِسْمِ ٱللَّٰهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ</div>
+            </div>
+            
+            <div id="verses-list"></div>
+
+            <div class="page-navigation">
+                <button id="prev-btn" class="nav-arrow" onclick="prevSurah()">
+                    <span>←</span> Previous
+                </button>
+                <button id="next-btn" class="nav-arrow" onclick="nextSurah()">
+                    Next <span>→</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global Variables
+        let allChapters = []; 
+        let currentChapterId = 1;
+
+        // DOM Elements
+        const libraryView = document.getElementById('library-view');
+        const surahView = document.getElementById('surah-view');
+        const surahGrid = document.getElementById('surah-grid');
+        const libraryLoader = document.getElementById('library-loader');
+        const pageLoader = document.getElementById('page-loader');
+        const surahContent = document.getElementById('surah-content');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        
+        // 1. Load Library
+        fetch('https://api.quran.com/api/v4/chapters?language=en')
+            .then(res => res.json())
+            .then(data => {
+                allChapters = data.chapters;
+                libraryLoader.style.display = 'none';
+                renderLibrary(allChapters);
+            })
+            .catch(err => {
+                libraryLoader.innerHTML = `<div class="error-msg">Could not load library.</div>`;
+            });
+
+        function renderLibrary(chapters) {
+            surahGrid.innerHTML = '';
+            chapters.forEach((chapter, index) => {
+                const book = document.createElement('div');
+                book.className = 'book-spine';
+                // Slight delay for staggering effect
+                book.style.animationDelay = `${index * 0.05}s`; 
+                
+                book.innerHTML = `
+                    <div class="surah-num">${chapter.id}</div>
+                    <div class="surah-eng">${chapter.name_simple}</div>
+                    <div class="surah-ara">${chapter.name_arabic}</div>
+                `;
+                book.onclick = () => openSurah(chapter.id);
+                surahGrid.appendChild(book);
+            });
+        }
+
+        // 2. Open Surah Logic
+        async function openSurah(id) {
+            currentChapterId = parseInt(id);
+            const chapterInfo = allChapters.find(c => c.id === currentChapterId);
+            const chapterName = chapterInfo ? chapterInfo.name_simple : "Surah " + id;
+
+            libraryView.style.display = 'none';
+            surahView.style.display = 'block';
+            pageLoader.style.display = 'block';
+            surahContent.style.display = 'none';
+            document.getElementById('display-title').innerText = chapterName;
+            document.getElementById('verses-list').innerHTML = '';
+
+            updateNavButtons();
+
+            try {
+                // Fetch Data (Force 300 limit for full surahs)
+                const arabicPromise = fetch(`https://api.quran.com/api/v4/quran/verses/uthmani?chapter_number=${id}&per_page=300`)
+                    .then(r => r.json());
+
+                const englishPromise = fetch(`https://api.quran.com/api/v4/quran/translations/131?chapter_number=${id}&per_page=300`)
+                    .then(r => r.json());
+
+                const [arabicData, englishData] = await Promise.all([arabicPromise, englishPromise]);
+
+                renderPage(arabicData.verses, englishData.translations);
+
+                pageLoader.style.display = 'none';
+                surahContent.style.display = 'block';
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            } catch (error) {
+                console.error(error);
+                pageLoader.innerHTML = `<div class="error-msg">Sorry! We couldn't fetch the full text.</div>`;
+            }
+        }
+
+        // 3. Render Verses with Cascade Animation
+        function renderPage(arabicVerses, englishTranslations) {
+            const container = document.getElementById('verses-list');
+            
+            arabicVerses.forEach((verse, index) => {
+                const translation = englishTranslations[index]; 
+                const verseNum = verse.verse_key.split(':')[1];
+                let englishText = translation ? translation.text : "";
+                englishText = englishText.replace(/<sup.*?<\/sup>/g, ""); 
+
+                const div = document.createElement('div');
+                div.className = 'verse-container';
+                
+                // STAGGERED ANIMATION: Each verse waits a tiny bit longer
+                // Capped at 1s delay so the bottom of page doesn't take forever
+                const delay = Math.min(index * 0.1, 1.0); 
+                div.style.animationDelay = `${delay}s`;
+
+                div.innerHTML = `
+                    <div class="arabic-text">
+                        ${verse.text_uthmani} 
+                        <span class="ayah-badge">${verseNum}</span>
+                    </div>
+                    <div class="english-text">${englishText}</div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function updateNavButtons() {
+            if (currentChapterId <= 1) prevBtn.style.visibility = 'hidden';
+            else prevBtn.style.visibility = 'visible';
+
+            if (currentChapterId >= 114) nextBtn.style.visibility = 'hidden';
+            else nextBtn.style.visibility = 'visible';
+        }
+
+        function nextSurah() {
+            if (currentChapterId < 114) openSurah(currentChapterId + 1);
+        }
+
+        function prevSurah() {
+            if (currentChapterId > 1) openSurah(currentChapterId - 1);
+        }
+
+        function goBack() {
+            surahView.style.display = 'none';
+            libraryView.style.display = 'block';
+            window.scrollTo(0,0);
+            pageLoader.innerHTML = `<span class="heart-beat">✨</span><br>Gathering all verses...`;
+        }
+    </script>
+</body>
+</html>
